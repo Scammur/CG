@@ -4,6 +4,7 @@ from sys import platform as pf
 from time import sleep as sp
 try:
     import requests, bs4, rich
+    import httpx
     from rich import print as rp
     from rich.panel import Panel as pan
     from requests import get as gt
@@ -54,8 +55,23 @@ def clear():
 #main
 def main():
     clear()
-    user=input("%s(USER ID/EMAIL):~ "%(c))
-    passw=input("%s(PASSWORD):~ "%(c))
+    try:
+        user=input("%s(USER ID/EMAIL):~ "%(c))
+    except KeyboardInterrupt:
+        rp("%sKeyboardInterrupt DETECTED, CTRL+C IS NOT ALLOWED"%(R))
+        time.sleep(10)
+        main()
+    except EOFError:
+        rp("%sEOFError DETECTED, CTRL+D IS NOT ALLOWED"%(R))
+    try:
+        passw=input("%s(PASSWORD):~ "%(c))
+    except KeyboardInterrupt:
+        rp("%sKeyboardInterrupt DETECTED, CTRL+C IS NOT ALLOWED"%(R))
+        time.sleep(10)
+        main()
+    except EOFError:
+        rp("%sEOFError DETECTED, CTRL+D IS NOT ALLOWED"%(R))
+
     clear()
     rp(pan("%s[%s1%s]%s COOKIE 1(datr, fr, xs)\n%s[%s2%s]%s COOKIE 2(c_user w/ token)\n%s[%s3%s]%s EXIT"%(Y,C,Y,G,Y,C,Y,G,Y,C,Y,R),border_style="bold purple"))
     try:
@@ -72,7 +88,7 @@ def main():
 def datr(user,passw):
     session=requests.Session()
     headers = {
-        'authority': 'free.facebook.com',
+        'authority': 'm.facebook.com',
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*[inserted by cython to avoid comment closer]/[inserted by cython to avoid comment closer]*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'accept-language': 'en-US,en;q=0.9',
         'cache-control': 'max-age=0',
@@ -93,9 +109,18 @@ def datr(user,passw):
         'user-agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
         'viewport-width': '980',
         }
-    getlog = session.get(f'https://free.facebook.com/login.php')
-    idpass ={"lsd":re.search('name="lsd" value="(.*?)"', str(getlog.text)).group(1),"jazoest":re.search('name="jazoest" value="(.*?)"', str(getlog.text)).group(1),"m_ts":re.search('name="m_ts" value="(.*?)"', str(getlog.text)).group(1),"li":re.search('name="li" value="(.*?)"', str(getlog.text)).group(1),"try_number":"0","unrecognize_tries":"0","email":user,"pass":passw,"login":"Log In","bi_xrwh":re.search('name="bi_xrwh" value="(.*?)"', str(getlog.text)).group(1),}
-    comp=session.post("https://free.facebook.com/login/device-based/regular/login/?shbl=1&refsrc=deprecated",headers=headers,data=idpass,allow_redirects=False)
+    #getlog = session.get(f'https://mbasic.facebook.com/login.php')
+    getlog = session.get(f'https://m.facebook.com/login/device-based/password/?uid={user}&flow=login_no_pin&refsrc=deprecated&_rdr')
+    idpass={
+            "lsd":re.search('name="lsd" value="(.*?)"', str(getlog.text)).group(1),
+            "jazoest":re.search('name="jazoest" value="(.*?)"', str(getlog.text)).group(1),
+            "uid":user,
+            "next":"https://m.facebook.com/login/save-device/",
+            "flow":"login_no_pin",
+            "pass":passw,
+                    }
+    #idpass ={"lsd":re.search('name="lsd" value="(.*?)"', str(getlog.text)).group(1),"jazoest":re.search('name="jazoest" value="(.*?)"', str(getlog.text)).group(1),"m_ts":re.search('name="m_ts" value="(.*?)"', str(getlog.text)).group(1),"li":re.search('name="li" value="(.*?)"', str(getlog.text)).group(1),"try_number":"0","unrecognize_tries":"0","email":user,"pass":passw,"login":"Log In","bi_xrwh":re.search('name="bi_xrwh" value="(.*?)"', str(getlog.text)).group(1),}
+    comp=session.post("https://m.facebook.com/login/device-based/regular/login/?shbl=1&refsrc=deprecated",headers=headers,data=idpass,allow_redirects=False)
     drax=session.cookies.get_dict().keys()
     cookie=";".join([key+"="+value for key,value in session.cookies.get_dict().items()])
     if "c_user" in drax:
@@ -143,7 +168,7 @@ def cuser(user,passw):
           'api_key':f'62f8ce9f74b12f84c123cc23437a4a32',
           }
     headers={
-          'User-Agent': "Dalvik/2.1.0 (Linux; U; Android 8.0.0; SM-A720F Build/R16NW) [FBAN/Orca-Android;FBAV/196.0.0.29.99;FBPN/com.facebook.orca;FBLC/en_US;FBBV/135374479;FBCR/SMART;FBMF/samsung;FBBD/samsung;FBDV/SM-A720F;FBSV/8.0.0;FBCA/armeabi-v7a:armeabi;FBDM/{density=3.0,width=1080,height=1920};FB_FW/1;]",
+          'User-Agent': "[FBAN/FB4A;FBAV/196.0.0.29.99;FBPN/com.facebook.katana;FBLC/en_US;FBBV/135374479;FBCR/SMART;FBMF/samsung;FBBD/samsung;FBDV/SM-A720F;FBSV/8.0.0;FBCA/armeabi-v7a:armeabi;FBDM/{density=3.0,width=1080,height=1920};FB_FW/1;]','[FBAN/FB4A;FBAV/196.0.0.29.99;FBPN/com.facebook.katana;FBLC/en_US;FBBV/135374479;FBCR/SMART;FBMF/samsung;FBBD/samsung;FBDV/SM-A720F;FBSV/8.0.0;FBCA/armeabi-v7a:armeabi;FBDM/{density=3.0,width=1080,height=1920};FB_FW/1;]",
           'Content-Type': 'application/x-www-form-urlencoded',
           'Host': 'graph.facebook.com',
           'X-FB-Net-HNI': str(random.randint(10000,99999)),
@@ -162,14 +187,17 @@ def cuser(user,passw):
           #"d29d67d37eca387482a8a5b740f84f62",
           #str(uuid.uuid4()).replace('-','')
           }
-    pos=requests.post("https://b-graph.facebook.com/auth/login",headers=headers,data=data,allow_redirects=False).json()
+    pos=httpx.post("https://b-graph.facebook.com/auth/login",headers=headers,data=data,follow_redirects=False).json()
     if "session_key" in pos:
         clear()
-        print("%sUSER ID/EMAIL: %s%s\n%s\n%sPASSWORD: %s%s\n%s\n%sCOOKIE: %s%s\n%s\n%sACCESS_TOKEN: %s%s"%(g,c,user,"\033[1;32m="*os.get_terminal_size().columns,g,c,passw,"\033[1;32m="*os.get_terminal_size().columns,g,c,';'.join(i['name']+'='+i['value'] for i in pos['session_cookies']),"\033[1;32m="*os.get_terminal_size().columns,g,c,pos['access_token']))
+        rp(pos)
+        print("%sUSER ID/EMAIL: %s%s\n%s\n%sPASSWORD: %s%s\n%s\n%sCOOKIE: %s%s\n%s\n%sACCESS_TOKEN: %s%s"%(g,c,user,"\033[1;32m="*os.get_terminal_size().columns,g,c,passw,"\033[1;32m="*os.get_terminal_size().columns,g,c,f"sb={''.join(random.choices(string.ascii_letters+string.digits+'_',k=24))};"+';'.join(i['name']+'='+i['value'] for i in pos['session_cookies']),"\033[1;32m="*os.get_terminal_size().columns,g,c,pos['access_token']))
         input("\nPress Enter To Go back in Main menu")
         main()
     else:
+        rp(pos)
         print("%sINVALID/CHECKPOINT"%(r))
         input("\033[1;36mPress Enter To Go Back In Main Menu")
         main()
 main()
+
